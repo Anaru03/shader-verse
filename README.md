@@ -1,22 +1,27 @@
 <div align="center">
 
-# 🌌 SHADER VERSE
+# SHADER VERSE
 
-### Laboratorio 5 · Shaders · Gráficas por Computadora
+### Software Renderer 3D · Rust · Blender
 
-**Una galería interactiva de mundos creados con geometría 3D y colores procedurales en Rust.**
+**Renderizador 3D por software desarrollado en Rust para visualizar cuerpos celestes mediante shaders procedurales y rasterización de triángulos.**
 
-![Rust](https://img.shields.io/badge/Rust-Software_Renderer-CE6B3C?style=for-the-badge&logo=rust&logoColor=white)
-![Blender](https://img.shields.io/badge/Blender-Geometr%C3%ADa_3D-EA7600?style=for-the-badge&logo=blender&logoColor=white)
-![Shaders](https://img.shields.io/badge/Shaders-Procedurales-536CB5?style=for-the-badge)
+![Rust](https://img.shields.io/badge/RUST-LANGUAGE-ECA78F?style=for-the-badge&logo=rust&logoColor=white)
+![Blender](https://img.shields.io/badge/BLENDER-3D_MODELING-F5792A?style=for-the-badge&logo=blender&logoColor=white)
+![Minifb](https://img.shields.io/badge/MINIFB-WINDOWING-1687C3?style=for-the-badge)
+![OBJ](https://img.shields.io/badge/OBJ-3D_MODEL-6B7280?style=for-the-badge)
+![CPU](https://img.shields.io/badge/CPU-RASTERIZATION-0891B2?style=for-the-badge)
+![Shaders](https://img.shields.io/badge/SHADERS-PROCEDURAL-7C3AED?style=for-the-badge)
 
-**6 cuerpos celestes · Rotación interactiva · Anillos procedurales · Sin texturas de imagen**
+![Status](https://img.shields.io/badge/STATUS-COMPLETED-00C853?style=for-the-badge)
+
+**Universidad del Valle de Guatemala · Gráficas por Computadora · 2026**
 
 </div>
 
 ---
 
-## ✨ Acerca del proyecto
+## Acerca del proyecto
 
 **Shader Verse** es un laboratorio de gráficas por computadora desarrollado en **Rust**. Su objetivo es crear la apariencia de cuerpos celestes mediante **shaders que calculan colores con operaciones matemáticas**, en lugar de utilizar texturas PNG/JPG o materiales importados.
 
@@ -24,9 +29,9 @@ La galería combina dos formas de representación: esferas renderizadas mediante
 
 > **Nota:** La geometría de Blender aporta las formas (cráteres, engranajes, edificios y estructuras), mientras que Rust determina sus colores. La rotación y el menú son funcionalidades interactivas adicionales.
 
-## 🪐 Galería celestial
+## Galería celestial
 
-### 01 · ☀️ Sun — Estrella
+### 01 · Sun — Estrella
 
 Modelo estelar con estructuras solares, filamentos y un shader que combina tonos incandescentes, granulación y variaciones de plasma.
 
@@ -36,7 +41,7 @@ Modelo estelar con estructuras solares, filamentos y un shader que combina tonos
 
 **Capas de color:** plasma base · granulación · filamentos · regiones oscuras.
 
-### 02 · 🌑 Moon — Planeta rocoso
+### 02 · Moon — Planeta rocoso
 
 Mundo rocoso con relieve y cráteres modelados en Blender. El shader aporta variaciones minerales, zonas oscuras y polvo lunar.
 
@@ -46,7 +51,7 @@ Mundo rocoso con relieve y cráteres modelados en Blender. El shader aporta vari
 
 **Capas de color:** roca base · minerales · regiones oscuras · polvo lunar.
 
-### 03 · 🪐 Zephyra — Gigante gaseoso
+### 03 · Zephyra — Gigante gaseoso
 
 Planeta gaseoso con bandas de nubes, turbulencia atmosférica, tormentas y un **sistema de anillos generado matemáticamente**.
 
@@ -56,7 +61,7 @@ Planeta gaseoso con bandas de nubes, turbulencia atmosférica, tormentas y un **
 
 **Efectos del shader:** bandas atmosféricas · turbulencia · nubes · tormenta. Los anillos se calculan sin imágenes de textura.
 
-### 04 · ⚙️ Clock — Planeta mecánico
+### 04 · Clock — Planeta mecánico
 
 Un mundo de engranajes y estructuras orbitales con variaciones metálicas y reflejos cálidos calculados por el renderer.
 
@@ -66,7 +71,7 @@ Un mundo de engranajes y estructuras orbitales con variaciones metálicas y refl
 
 **Diseño visual:** metales oscuros · tonos cobrizos · variaciones de superficie · iluminación.
 
-### 05 · 🔩 Mecanic — Planeta industrial
+### 05 · Mecanic — Planeta industrial
 
 Un planeta formado por maquinaria y estructuras complejas, con una paleta de titanio gris azulado y acentos metálicos discretos.
 
@@ -76,7 +81,7 @@ Un planeta formado por maquinaria y estructuras complejas, con una paleta de tit
 
 **Capas de color:** titanio · grafito · plata · energía naranja tenue.
 
-### 06 · 🏙️ Building — Planeta-ciudad
+### 06 · Building — Planeta-ciudad
 
 Un mundo urbano cubierto por edificios, torres y una plataforma circular. Su shader conserva una apariencia de concreto y acero con variaciones frías y cálidas.
 
@@ -88,7 +93,7 @@ Un mundo urbano cubierto por edificios, torres y una plataforma circular. Su sha
 
 ---
 
-## 🎮 Controles
+## Controles
 
 | Tecla | Acción |
 |:---:|---|
@@ -107,7 +112,7 @@ Un mundo urbano cubierto por edificios, torres y una plataforma circular. Su sha
 
 > Para observar un planeta sin que el panel cubra parte de la imagen, presiona `M`.
 
-## 🎨 ¿Cómo funcionan los shaders?
+## ¿Cómo funcionan los shaders?
 
 Los shaders producen los colores de las superficies mediante cálculos realizados en Rust. Entre las técnicas utilizadas están:
 
@@ -122,7 +127,7 @@ Cada cuerpo utiliza una combinación distinta de efectos. Las capas de color se 
 
 **Restricción principal:** no se usan texturas de imagen ni materiales importados de Blender para colorear los cuerpos celestes.
 
-## 🧰 Tecnologías
+## Tecnologías
 
 | Tecnología | Uso |
 |---|---|
@@ -133,7 +138,7 @@ Cada cuerpo utiliza una combinación distinta de efectos. Las capas de color se 
 | **font8x8** | Texto del menú dentro del framebuffer |
 | **Blender** | Modelado de geometría tridimensional original |
 
-## 🚀 Ejecución
+## Ejecución
 
 ### Requisitos
 
@@ -148,7 +153,7 @@ cargo run --release
 
 La aplicación necesita que los modelos OBJ usados por el programa estén presentes en `assets/models/`.
 
-## 📁 Estructura principal
+## Estructura principal
 
 ```text
 shader-verse/
@@ -172,7 +177,7 @@ shader-verse/
 └── README.md
 ```
 
-## 📋 Relación con la rúbrica
+## Relación con la rúbrica
 
 | Requisito del laboratorio | Implementación |
 |---|---|
