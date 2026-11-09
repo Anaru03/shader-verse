@@ -90,8 +90,10 @@ fn main() {
     .expect("No se pudo crear la ventana");
 
     let mut buffer = vec![0u32; W * H];
-    let clock = clock::ClockMesh::load("assets/models/clock/clock_planet.obj");
+    let clock = clock::ClockMesh::load("assets/models/clock/clock_optimized.obj", 0);
 
+    let sun = clock::ClockMesh::load("assets/models/sun/sun_optimized.obj", 1);
+    let moon = clock::ClockMesh::load("assets/models/moon/moon.obj", 2);
     let start = Instant::now();
     let mut selected = 0usize;
     let mut animated = false;
@@ -115,16 +117,20 @@ fn main() {
             selected = 2;
         }
 
+        if window.is_key_pressed(Key::Key5, KeyRepeat::No) {
+            selected = 4;
+        }
+
         if window.is_key_pressed(Key::Key4, KeyRepeat::No) {
             selected = 3;
         }
 
         if window.is_key_pressed(Key::Right, KeyRepeat::No) {
-            selected = (selected + 1) % 4;
+            selected = (selected + 1) % 5;
         }
 
         if window.is_key_pressed(Key::Left, KeyRepeat::No) {
-            selected = (selected + 3) % 4;
+            selected = (selected + 4) % 5;
         }
 
         if window.is_key_pressed(Key::Space, KeyRepeat::No) {
@@ -142,8 +148,12 @@ fn main() {
         }
 
         if dirty {
-            if selected == 3 {
-                clock.render(&mut buffer, W, H);
+            if selected == 1 {
+                moon.render(&mut buffer, W, H, frozen_time);
+            } else if selected == 4 {
+                sun.render(&mut buffer, W, H, frozen_time);
+            } else if selected == 3 {
+                clock.render(&mut buffer, W, H, frozen_time);
             } else {
                 render(&mut buffer, selected, frozen_time);
             }

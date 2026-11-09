@@ -4,10 +4,11 @@ pub struct ClockMesh {
     triangles: Vec<[Vec3; 3]>,
     center: Vec3,
     scale: f32,
+    kind: u8,
 }
 
 impl ClockMesh {
-    pub fn load(path: &str) -> Self {
+    pub fn load(path: &str, kind: u8) -> Self {
         let options = tobj::LoadOptions {
             triangulate: true,
             single_index: true,
@@ -54,6 +55,7 @@ impl ClockMesh {
             triangles,
             center,
             scale,
+            kind,
         }
     }
 
@@ -63,7 +65,7 @@ impl ClockMesh {
                 .abs();
 
         // Capa 1: acero oscuro
-        let mut color = Vec3::new(0.09, 0.11, 0.14);
+        let mut color = Vec3::new(0.30, 0.36, 0.44);
 
         // Capa 2: bronce
         let bronze = ((position.y * 9.0).sin() * 0.5 + 0.5) * 0.65;
@@ -83,16 +85,77 @@ impl ClockMesh {
         let light = Vec3::new(-0.5, 0.8, 1.0).normalize();
         let diffuse = normal.dot(light).max(0.0);
 
-        color * (0.30 + diffuse * 0.70)
+        color * (0.65 + diffuse * 0.55)
     }
 
-    pub fn render(&self, buffer: &mut [u32], width: usize, height: usize) {
+    fn sun_shader(p: Vec3) -> Vec3 {
+        let n = p.normalize_or_zero();
+
+        let a = (n.x * 47.0).sin() * (n.y * 39.0).cos() * (n.z * 51.0).sin();
+
+        let b = (n.x * 103.0 + n.y * 71.0).sin() * (n.z * 87.0).cos();
+
+        let plasma = (a * 0.5 + 0.5).clamp(0.0, 1.0);
+        let granules = (b * 0.5 + 0.5).powf(2.0);
+
+        let filaments = (n.y * 38.0 + a * 9.0 + b * 2.0).sin().abs().powf(5.0);
+
+        let spots = if plasma < 0.18 && granules < 0.35 {
+            0.70
+        } else {
+            0.0
+        };
+
+        let mut c = Vec3::new(0.85, 0.08, 0.005);
+        c = c.lerp(Vec3::new(1.0, 0.43, 0.025), plasma);
+
+        c = c.lerp(Vec3::new(1.0, 0.87, 0.27), granules * 0.70);
+
+        c += Vec3::new(0.9, 0.38, 0.04) * filaments * 0.45;
+
+        c *= 1.0 - spots;
+
+        c
+    }
+
+    fn moon_shader(position: Vec3, normal: Vec3) -> Vec3 {
+        let p = position * 8.0;
+
+        // Capa 1: roca gris
+        let mut c = Vec3::new(0.30, 0.32, 0.35);
+
+        // Capa 2: regiones minerales
+        let minerals = ((p.x * 2.7).sin() * (p.y * 3.1).cos() * (p.z * 2.3).sin()) * 0.5 + 0.5;
+
+        c = c.lerp(Vec3::new(0.55, 0.58, 0.62), minerals * 0.55);
+
+        // Capa 3: regiones oscuras
+        let dark = ((p.x * 7.0).sin() * (p.y * 5.0).cos()).abs();
+
+        c = c.lerp(Vec3::new(0.14, 0.16, 0.19), dark.powf(4.0) * 0.35);
+
+        // Capa 4: polvo lunar
+        let dust = ((p.x * 31.0).sin() * (p.y * 37.0).cos() * (p.z * 29.0).sin()).abs();
+
+        c += Vec3::splat(dust * 0.07);
+
+        // Iluminacion
+        let light = Vec3::new(-0.5, 0.8, 1.0).normalize();
+        let diffuse = normal.dot(light).abs();
+
+        c * (0.38 + diffuse * 0.62)
+    }
+
+    pub fn render(&self, buffer: &mut [u32], width: usize, height: usize, time: f32) {
+        let angle = time * 0.35;
+        let rotation = glam::Mat3::from_rotation_y(angle);
+
         let mut depth = vec![f32::INFINITY; width * height];
 
         buffer.fill(0x030610);
 
         for triangle in &self.triangles {
-            let p = triangle.map(|v| (v - self.center) * self.scale);
+            let p = triangle.map(|v| rotation * ((v - self.center) * self.scale));
 
             let normal = (p[1] - p[0]).cross(p[2] - p[0]).normalize_or_zero();
 
@@ -166,7 +229,13 @@ impl ClockMesh {
                     depth[index] = z;
 
                     let position = p[0] * a + p[1] * b + p[2] * c;
-                    let color = Self::shader(position, normal);
+                    let color = if self.kind == 1 {
+                        Self::sun_shader(position)
+                    } else if self.kind == 2 {
+                        Self::moon_shader(position, normal)
+                    } else {
+                        Self::shader(position, normal)
+                    };
 
                     let r = (color.x.clamp(0.0, 1.0) * 255.0) as u32;
                     let g = (color.y.clamp(0.0, 1.0) * 255.0) as u32;

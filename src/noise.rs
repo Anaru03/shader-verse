@@ -45,7 +45,7 @@ pub fn fbm(mut p: Vec3) -> f32 {
     let mut value = 0.0;
     let mut amplitude = 0.5;
 
-    for _ in 0..5 {
+    for _ in 0..3 {
         value += noise(p) * amplitude;
         p = p * 2.03 + Vec3::splat(13.7);
         amplitude *= 0.5;
