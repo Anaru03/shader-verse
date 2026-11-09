@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 glam = "0.34.3"
 minifb = "0.29.0"
+tobj = "4.0.5"
