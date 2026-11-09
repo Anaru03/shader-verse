@@ -1,0 +1,8 @@
+[package]
+name = "shader-verse"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+glam = "0.34.3"
+minifb = "0.29.0"
