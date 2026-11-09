@@ -1,3 +1,4 @@
+mod menu;
 mod rings;
 use crate::noise::{color, hash};
 mod clock;
@@ -9,7 +10,6 @@ use std::time::Instant;
 
 const W: usize = 600;
 const H: usize = 600;
-const PI: f32 = std::f32::consts::PI;
 
 // =============================================
 // SHADER 1: AETHERIS - ESTRELLA DE PLASMA
@@ -103,7 +103,7 @@ fn render(buffer: &mut [u32], selected: usize, time: f32, yaw: f32, pitch: f32) 
 
 fn main() {
     let mut window = Window::new(
-        "Shader Verse | 1-3: Planets | Arrows: Change | Space: Animate",
+        "Shader Verse | Procedural Celestial Gallery",
         W,
         H,
         WindowOptions::default(),
@@ -115,11 +115,16 @@ fn main() {
 
     let sun = clock::ClockMesh::load("assets/models/sun/sun_optimized.obj", 1);
     let moon = clock::ClockMesh::load("assets/models/moon/moon.obj", 2);
+    let mecanic = clock::ClockMesh::load("assets/models/mecanic/mecanic_planet.obj", 3);
+
+    let building = clock::ClockMesh::load("assets/models/building/building_planet.obj", 4);
+
     let start = Instant::now();
-    let mut selected = 0usize;
+    let mut selected = 4usize;
+    let mut menu_visible = true;
     let mut yaw = 0.0_f32;
     let mut pitch = 0.0_f32;
-    let mut spin = 0.0_f32;
+
     let mut animated = false;
     let mut dirty = true;
     let mut frozen_time = 0.0_f32;
@@ -130,7 +135,7 @@ fn main() {
         let previous = selected;
 
         if window.is_key_pressed(Key::Key1, KeyRepeat::No) {
-            selected = 0;
+            selected = 4;
         }
 
         if window.is_key_pressed(Key::Key2, KeyRepeat::No) {
@@ -141,8 +146,16 @@ fn main() {
             selected = 2;
         }
 
+        if window.is_key_pressed(Key::Key6, KeyRepeat::No) {
+            selected = 6;
+        }
+
+        if window.is_key_pressed(Key::Key7, KeyRepeat::No) {
+            selected = 6;
+        }
+
         if window.is_key_pressed(Key::Key5, KeyRepeat::No) {
-            selected = 4;
+            selected = 5;
         }
 
         if window.is_key_pressed(Key::Key4, KeyRepeat::No) {
@@ -174,6 +187,11 @@ fn main() {
             dirty = true;
         }
 
+        if window.is_key_pressed(Key::M, KeyRepeat::No) {
+            menu_visible = !menu_visible;
+            dirty = true;
+        }
+
         if window.is_key_pressed(Key::Space, KeyRepeat::No) {
             animated = !animated;
             dirty = true;
@@ -189,7 +207,11 @@ fn main() {
         }
 
         if dirty {
-            if selected == 1 {
+            if selected == 5 {
+                mecanic.render(&mut buffer, W, H, frozen_time, yaw, pitch);
+            } else if selected == 6 {
+                building.render(&mut buffer, W, H, frozen_time, yaw, pitch);
+            } else if selected == 1 {
                 moon.render(&mut buffer, W, H, frozen_time, yaw, pitch);
             } else if selected == 4 {
                 sun.render(&mut buffer, W, H, frozen_time, yaw, pitch);
@@ -198,6 +220,22 @@ fn main() {
             } else {
                 render(&mut buffer, selected, frozen_time, yaw, pitch);
             }
+            menu::draw(
+                &mut buffer,
+                W,
+                H,
+                match selected {
+                    4 => 0,
+                    1 => 1,
+                    2 => 2,
+                    3 => 3,
+                    5 => 4,
+                    6 => 5,
+                    _ => 0,
+                },
+                menu_visible,
+                animated,
+            );
             dirty = false;
         }
 
