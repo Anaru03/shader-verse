@@ -146,9 +146,20 @@ impl ClockMesh {
         c * (0.38 + diffuse * 0.62)
     }
 
-    pub fn render(&self, buffer: &mut [u32], width: usize, height: usize, time: f32) {
+    pub fn render(
+        &self,
+        buffer: &mut [u32],
+        width: usize,
+        height: usize,
+        time: f32,
+        yaw: f32,
+        pitch: f32,
+    ) {
         let angle = time * 0.35;
-        let rotation = glam::Mat3::from_rotation_y(angle);
+
+        let rotation = glam::Mat3::from_rotation_y(yaw)
+            * glam::Mat3::from_rotation_x(pitch)
+            * glam::Mat3::from_rotation_y(angle);
 
         let mut depth = vec![f32::INFINITY; width * height];
 

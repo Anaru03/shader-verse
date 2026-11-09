@@ -1,3 +1,4 @@
+mod rings;
 use crate::noise::{color, hash};
 mod clock;
 mod noise;
@@ -40,7 +41,7 @@ fn to_rgb(c: Vec3) -> u32 {
     (r << 16) | (g << 8) | b
 }
 
-fn render(buffer: &mut [u32], selected: usize, time: f32) {
+fn render(buffer: &mut [u32], selected: usize, time: f32, yaw: f32, pitch: f32) {
     let radius = 0.78_f32;
     let aspect = W as f32 / H as f32;
 
@@ -56,14 +57,18 @@ fn render(buffer: &mut [u32], selected: usize, time: f32) {
                 let normal = Vec3::new(sx, sy, z).normalize();
 
                 // Rotacion visual del shader
-                let angle = time * 0.12;
+                let angle = time * 0.65;
                 let rotated = Vec3::new(
                     normal.x * angle.cos() + normal.z * angle.sin(),
                     normal.y,
                     -normal.x * angle.sin() + normal.z * angle.cos(),
                 );
 
-                shade(rotated, selected, time)
+                shade(
+                    glam::Mat3::from_rotation_y(yaw) * glam::Mat3::from_rotation_x(pitch) * rotated,
+                    selected,
+                    time,
+                )
             } else {
                 let direction = Vec3::new(sx * 90.0, sy * 90.0, 1.0);
                 let stars = hash(direction.floor());
@@ -75,7 +80,23 @@ fn render(buffer: &mut [u32], selected: usize, time: f32) {
                 }
             };
 
-            buffer[y * W + x] = to_rgb(c);
+            let mut final_color = c;
+
+            if selected == 2 {
+                if let Some((ring_z, ring_color)) = rings::ring_pixel(sx, sy, radius) {
+                    let sphere_z = if distance <= radius * radius {
+                        (radius * radius - distance).sqrt()
+                    } else {
+                        f32::NEG_INFINITY
+                    };
+
+                    if ring_z > sphere_z {
+                        final_color = ring_color;
+                    }
+                }
+            }
+
+            buffer[y * W + x] = to_rgb(final_color);
         }
     }
 }
@@ -96,6 +117,9 @@ fn main() {
     let moon = clock::ClockMesh::load("assets/models/moon/moon.obj", 2);
     let start = Instant::now();
     let mut selected = 0usize;
+    let mut yaw = 0.0_f32;
+    let mut pitch = 0.0_f32;
+    let mut spin = 0.0_f32;
     let mut animated = false;
     let mut dirty = true;
     let mut frozen_time = 0.0_f32;
@@ -125,12 +149,29 @@ fn main() {
             selected = 3;
         }
 
-        if window.is_key_pressed(Key::Right, KeyRepeat::No) {
-            selected = (selected + 1) % 5;
+        let speed = 0.10;
+
+        if window.is_key_down(Key::Left) {
+            yaw -= speed;
+            dirty = true;
+        }
+        if window.is_key_down(Key::Right) {
+            yaw += speed;
+            dirty = true;
+        }
+        if window.is_key_down(Key::Up) {
+            pitch += speed;
+            dirty = true;
+        }
+        if window.is_key_down(Key::Down) {
+            pitch -= speed;
+            dirty = true;
         }
 
-        if window.is_key_pressed(Key::Left, KeyRepeat::No) {
-            selected = (selected + 4) % 5;
+        if window.is_key_pressed(Key::R, KeyRepeat::No) {
+            yaw = 0.0;
+            pitch = 0.0;
+            dirty = true;
         }
 
         if window.is_key_pressed(Key::Space, KeyRepeat::No) {
@@ -149,13 +190,13 @@ fn main() {
 
         if dirty {
             if selected == 1 {
-                moon.render(&mut buffer, W, H, frozen_time);
+                moon.render(&mut buffer, W, H, frozen_time, yaw, pitch);
             } else if selected == 4 {
-                sun.render(&mut buffer, W, H, frozen_time);
+                sun.render(&mut buffer, W, H, frozen_time, yaw, pitch);
             } else if selected == 3 {
-                clock.render(&mut buffer, W, H, frozen_time);
+                clock.render(&mut buffer, W, H, frozen_time, yaw, pitch);
             } else {
-                render(&mut buffer, selected, frozen_time);
+                render(&mut buffer, selected, frozen_time, yaw, pitch);
             }
             dirty = false;
         }
