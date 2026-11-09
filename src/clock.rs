@@ -146,6 +146,101 @@ impl ClockMesh {
         c * (0.38 + diffuse * 0.62)
     }
 
+    // MECANIC: planeta industrial
+
+    fn mecanic_shader(p: Vec3, normal: Vec3) -> Vec3 {
+        let q = p * 5.0;
+
+        // Capa 1: titanio gris acero
+        let mut c = Vec3::new(0.55, 0.65, 0.75);
+
+        // Capa 2: variaciones de grafito
+        let graphite = ((q.x * 2.3).sin() * (q.z * 2.7).cos()).abs();
+
+        c = c.lerp(Vec3::new(0.32, 0.40, 0.50), graphite * 0.18);
+
+        // Capa 3: detalles plateados
+        let silver = ((q.y * 3.1).sin() * (q.x * 2.4).cos()).abs();
+
+        c = c.lerp(Vec3::new(0.76, 0.81, 0.87), silver.powf(3.0) * 0.16);
+
+        // Capa 4: energia naranja tenue
+        let energy = ((q.x * 7.0).sin() * (q.y * 8.0).cos() * (q.z * 6.0).sin())
+            .abs()
+            .powf(18.0);
+
+        c += Vec3::new(0.85, 0.30, 0.06) * energy * 0.10;
+
+        let light = Vec3::new(-0.5, 0.8, 1.0).normalize();
+        let diffuse = normal.dot(light).abs();
+
+        c * (0.35 + diffuse * 0.65)
+    }
+
+    // BUILDING: planeta ciudad
+
+    fn building_shader(p: Vec3, normal: Vec3) -> Vec3 {
+        let q = p * 5.0;
+
+        // Capa 1: concreto gris azulado
+        let mut c = Vec3::new(0.55, 0.65, 0.75);
+
+        // Capa 2: acero estructural
+        let steel = ((q.x * 2.1).sin() * (q.z * 2.6).cos()).abs();
+
+        c = c.lerp(Vec3::new(0.38, 0.48, 0.58), steel * 0.15);
+
+        // Capa 3: cristales azulados
+        let glass = ((q.x * 6.0).sin() * (q.y * 7.0).cos()).abs().powf(8.0);
+
+        c = c.lerp(Vec3::new(0.30, 0.68, 0.86), glass * 0.12);
+
+        // Capa 4: iluminacion ambar discreta
+        let amber = ((q.z * 5.0).sin() * (q.y * 6.0).cos()).abs().powf(10.0);
+
+        c += Vec3::new(0.95, 0.48, 0.12) * amber * 0.08;
+
+        let light = Vec3::new(-0.5, 0.8, 1.0).normalize();
+        let diffuse = normal.dot(light).abs();
+
+        c * (0.35 + diffuse * 0.65)
+    }
+
+    fn diagnostic_shader(normal: Vec3) -> Vec3 {
+        let light = Vec3::new(-0.5, 0.8, 1.0).normalize();
+        let diffuse = normal.dot(light).abs();
+
+        Vec3::new(0.55, 0.65, 0.75) * (0.35 + diffuse * 0.65)
+    }
+
+    // SERAPHIM: gigante gaseoso celestial
+    fn seraphim_shader(p: Vec3, normal: Vec3) -> Vec3 {
+        let n = p.normalize_or_zero();
+
+        // Capa 1: atmosfera azul profundo
+        let mut c = Vec3::new(0.08, 0.22, 0.48);
+
+        // Capa 2: bandas gaseosas
+        let bands = (n.y * 32.0 + (n.x * 8.0).sin() * 2.0 + (n.z * 7.0).cos()).sin() * 0.5 + 0.5;
+
+        c = c.lerp(Vec3::new(0.35, 0.78, 0.92), bands * 0.75);
+
+        // Capa 3: turbulencia atmosferica
+        let turbulence = ((p.x * 17.0).sin() * (p.y * 13.0).cos() * (p.z * 19.0).sin()).abs();
+
+        c = c.lerp(Vec3::new(0.72, 0.85, 1.0), turbulence * 0.35);
+
+        // Capa 4: energia dorada
+        let energy = ((p.x * 11.0).sin() * (p.z * 9.0).cos()).abs().powf(12.0);
+
+        c += Vec3::new(0.85, 0.62, 0.22) * energy * 0.18;
+
+        let light = Vec3::new(-0.5, 0.8, 1.0).normalize();
+        let diffuse = normal.dot(light).abs();
+
+        c * (0.42 + diffuse * 0.58)
+    }
+
     pub fn render(
         &self,
         buffer: &mut [u32],
@@ -244,6 +339,12 @@ impl ClockMesh {
                         Self::sun_shader(position)
                     } else if self.kind == 2 {
                         Self::moon_shader(position, normal)
+                    } else if self.kind == 3 {
+                        Self::mecanic_shader(position, normal)
+                    } else if self.kind == 4 {
+                        Self::building_shader(position, normal)
+                    } else if self.kind == 5 {
+                        Self::seraphim_shader(position, normal)
                     } else {
                         Self::shader(position, normal)
                     };
