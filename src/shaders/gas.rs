@@ -1,30 +1,47 @@
-use crate::noise::*;
+use crate::noise::{color, fbm, lighting, mix, smoothstep};
 use glam::Vec3;
 
 pub fn gas(n: Vec3, time: f32) -> Vec3 {
-    let p = n * 5.0;
+    let p = n * 4.0;
 
-    let warp = fbm(p * 1.8 + Vec3::new(time * 0.025, 0.0, 0.0));
-    let fine = fbm(p * 6.0);
+    // Capa 1: deformacion de las bandas atmosfericas
+    let turbulence = fbm(p * 1.4 + Vec3::new(time * 0.018, 0.0, 0.0));
 
-    let latitude = n.y * 35.0 + warp * 8.0 + fine * 1.5;
-    let bands = latitude.sin() * 0.5 + 0.5;
-    let thin = (latitude * 2.4).sin() * 0.5 + 0.5;
+    // Capa 2: bandas de diferentes grosores
+    let latitude = n.y * 26.0 + turbulence * 5.0;
+    let broad = latitude.sin() * 0.5 + 0.5;
+    let thin = (latitude * 2.7).sin() * 0.5 + 0.5;
 
+    let mut c = mix(color(0.12, 0.055, 0.035), color(0.88, 0.51, 0.24), broad);
+
+    c = mix(c, color(1.0, 0.83, 0.55), thin * 0.38);
+
+    // Capa 3: nubes turbulentas
+    let clouds = fbm(p * 3.2);
+    c = mix(
+        c,
+        color(0.95, 0.89, 0.76),
+        smoothstep(0.48, 0.75, clouds) * 0.55,
+    );
+
+    // Capa 4: tormenta eliptica con estructura interna
     let longitude = n.x.atan2(n.z);
-    let dx = (longitude - 0.55) / 0.40;
-    let dy = (n.y + 0.18) / 0.16;
+    let dx = (longitude - 0.45) / 0.45;
+    let dy = (n.y + 0.15) / 0.19;
     let distance = (dx * dx + dy * dy).sqrt();
 
-    let storm = 1.0 - smoothstep(0.55, 1.1, distance);
-    let vortex = ((distance * 18.0 - warp * 8.0).sin() * 0.5 + 0.5) * storm;
+    let storm = 1.0 - smoothstep(0.65, 1.05, distance);
+    let vortex = (distance * 21.0 - turbulence * 5.0).sin() * 0.5 + 0.5;
 
-    let mut c = mix(color(0.025, 0.13, 0.34), color(0.03, 0.75, 0.82), bands);
+    c = mix(c, color(0.72, 0.22, 0.10), storm * 0.75);
 
-    c = mix(c, color(0.48, 0.18, 0.78), thin * 0.35);
-    c = mix(c, color(0.72, 0.95, 0.94), fine * 0.25);
-    c = mix(c, color(1.2, 0.34, 0.20), storm * 0.75);
-    c = mix(c, color(1.5, 0.85, 0.48), vortex * 0.65);
+    c = mix(c, color(1.0, 0.68, 0.35), storm * vortex * 0.55);
 
-    c * (0.32 + lighting(n) * 0.68)
+    // Capa 5: iluminacion atmosferica
+    let rim = (1.0 - n.z.max(0.0)).powf(3.0);
+
+    c = c * lighting(n);
+    c += color(0.35, 0.18, 0.10) * rim * 0.25;
+
+    c
 }
